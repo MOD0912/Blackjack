@@ -15,7 +15,13 @@ import os
 import re
 
 
+ctk.deactivate_automatic_dpi_awareness()
+
+
 class Cards:
+    """
+    Cards
+    """
     @staticmethod
     def function() -> list[str]:
         """
@@ -60,6 +66,7 @@ class BlackjackGame(ctk.CTk):
         self.height = self.winfo_screenheight()
 
         # widgets
+        self.after(0, lambda: self.state("zoomed"))
         self.attributes("-fullscreen", True)
         self.bg = ImageTk.PhotoImage(
             Image.open("./design/design1.png").resize(
@@ -73,16 +80,16 @@ class BlackjackGame(ctk.CTk):
         """
         resets all values to game start
         """
-        self.canvas1 = ctk.CTkCanvas(self)
+        self.canvas1 = ctk.CTkCanvas(self, border=0, highlightthickness=0)
         self.canvas1.pack(fill="both", expand=True)
         self.canvas1.create_image(0, 0, image=self.bg, anchor="nw")
 
         print(self.keys())
         self.second_card_counter = 0
         self.player_cards_x = int(self.width / 2)
-        self.player_cards_y = 730
+        self.player_cards_y = int(self.height / 1.479)
         self.croupier_cards_x = int(self.width / 2)
-        self.croupier_cards_y = 235
+        self.croupier_cards_y = int(self.height / 4.695)
         self.x_change = 20
         self.y_change = 20
         self.value_player = 0
@@ -116,11 +123,6 @@ class BlackjackGame(ctk.CTk):
             ),
             fill="white"
         )
-        self.create_cards("Croupier")
-        self.create_cards("Player")
-        self.create_cards("Croupier")
-        self.create_cards("Player")
-
         self.hit_btn = ctk.CTkButton(
             self.canvas1,
             text="Hit",
@@ -144,8 +146,9 @@ class BlackjackGame(ctk.CTk):
             corner_radius=0
         )
         self.stand_btn.place(
-            x=self.width / 2 - 100,
-            y=self.height - self.height / 10.8
+            x=self.width / 2,
+            y=self.height - self.height / 10.8,
+            anchor="n"
         )
         self.leave_btn = ctk.CTkButton(
             self.canvas1,
@@ -157,9 +160,15 @@ class BlackjackGame(ctk.CTk):
             corner_radius=0
         )
         self.leave_btn.place(
-            x=self.width / 2 + self.width / 4.8 - 200,
-            y=self.height - self.height / 10.8
+            x=self.width / 2 + self.width / 4.8,
+            y=self.height - self.height / 10.8,
+            anchor="ne"
         )
+
+        self.create_cards("Croupier")
+        self.create_cards("Player")
+        self.create_cards("Croupier")
+        self.create_cards("Player")
 
     def create_cards(self, player: tp.Literal["Player", "Croupier"]) -> None:
         """
@@ -171,6 +180,7 @@ class BlackjackGame(ctk.CTk):
             self.filelist = Cards().function()
 
         card = random.choice(self.filelist)
+
         self.filelist.remove(card)
         value = int(
             re.search(r'\d+', card).group()

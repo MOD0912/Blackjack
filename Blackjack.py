@@ -9,13 +9,26 @@ Melvin Kapferer, Maximilian Koch
 """
 from PIL import Image, ImageTk
 import customtkinter as ctk
-import typing as tp
+from enum import Enum
 import random
 import os
 import re
 
 
+# remove not-working auto-dpi awareness
 ctk.deactivate_automatic_dpi_awareness()
+
+
+# enumerators for players / winners
+class PlayerKind(Enum):
+    player = "Player"
+    croupier = "Croupier"
+
+
+class WinnerKind(Enum):
+    player = "Player"
+    croupier = "Croupier"
+    draw = "Draw"
 
 
 class Cards:
@@ -128,7 +141,7 @@ class BlackjackGame(ctk.CTk):
             text="Hit",
             height=int(self.height / 21.6),
             width=int(self.width / 9.6),
-            command=lambda: self.create_cards("Player"),
+            command=lambda: self.create_cards(PlayerKind.player),
             fg_color="#202020",
             corner_radius=0
         )
@@ -165,12 +178,12 @@ class BlackjackGame(ctk.CTk):
             anchor="ne"
         )
 
-        self.create_cards("Croupier")
-        self.create_cards("Player")
-        self.create_cards("Croupier")
-        self.create_cards("Player")
+        self.create_cards(PlayerKind.player)
+        self.create_cards(PlayerKind.croupier)
+        self.create_cards(PlayerKind.player)
+        self.create_cards(PlayerKind.croupier)
 
-    def create_cards(self, player: tp.Literal["Player", "Croupier"]) -> None:
+    def create_cards(self, player: PlayerKind) -> None:
         """
         creates one card and places it
 
@@ -186,14 +199,15 @@ class BlackjackGame(ctk.CTk):
             re.search(r'\d+', card).group()
         )  # gets integer out of a string
 
-        if player == "Player":
+        if player == PlayerKind.player:
             self.player_cards_x += self.x_change
             self.player_cards_y += self.y_change
             x = self.player_cards_x - self.x_change
             y = self.player_cards_y - self.y_change
             self.value_player += value
             print(f"player value:{self.value_player}")
-        elif player == "Croupier":
+
+        elif player == PlayerKind.croupier:
             self.second_card_counter += 1
             if self.second_card_counter == 2:
                 card = "cards/CardBack.png"
@@ -228,10 +242,10 @@ class BlackjackGame(ctk.CTk):
 
         self.lst.append(card)  # handles common error
         if self.value_player > 21:
-            self.end("croupier")
+            self.end(WinnerKind.croupier)
 
         elif self.value_croupier > 21:
-            self.end("player")
+            self.end(WinnerKind.player)
 
         if self.value_player == 21:
             self.stand()
@@ -245,41 +259,42 @@ class BlackjackGame(ctk.CTk):
         self.canvas1.delete(self.hidden_card)
 
         while self.value_croupier < 17:
-            self.create_cards("Croupier")
+            self.create_cards(PlayerKind.croupier)
 
-        winner: tp.Literal["player", "croupier", "draw"]
         if self.value_croupier < self.value_player:
-            winner = "player"
+            winner = WinnerKind.player
 
         elif self.value_croupier > self.value_player:
-            winner = "croupier"
+            winner = WinnerKind.croupier
 
         else:
-            winner = "draw"
+            winner = WinnerKind.draw
 
         if self.value_croupier > 21 or self.value_player > 21:
             return
 
         self.end(winner)
 
-    def end(self, winner: tp.Literal["player", "croupier", "draw"]) -> None:
+    def end(self, winner: WinnerKind) -> None:
         """
         handles the end of a round
 
         :param winner: the rounds winner
         """
         print(f"winner is {winner}")
-        if winner == "draw":
+        if winner == WinnerKind.draw:
             text = "draw"
             x = 625
 
         else:
-            text = f"{winner} won!"
+            text = f"{winner.value} won!"
 
-            if winner == "player":
+            if winner == WinnerKind.player:
                 x = 200
-            else:
+            elif winner == WinnerKind.croupier:
                 x = 125
+            else:
+                raise ValueError("Invalid value for winner")
 
         self.hit_btn.configure(state="disabled")
         self.stand_btn.configure(state="disabled")

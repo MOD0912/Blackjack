@@ -11,6 +11,7 @@ from PIL import Image, ImageTk
 import customtkinter as ctk
 from enum import Enum
 import random
+import sys
 import os
 import re
 
@@ -78,8 +79,14 @@ class BlackjackGame(ctk.CTk):
         self.width = self.winfo_screenwidth()
         self.height = self.winfo_screenheight()
 
-        # widgets
-        self.after(0, lambda: self.state("zoomed"))
+        # window configuration
+        # check if the os is windows, and if not set fullscreen by using
+        # root.attributes instead of zoomed (state won't work on linux / darwin
+        if sys.platform == "win32":
+            self.after(0, lambda: self.state("zoomed"))
+        else:
+            self.attributes("-zoomed", 1)
+
         self.attributes("-fullscreen", True)
         self.bg = ImageTk.PhotoImage(
             Image.open("./design/design1.png").resize(

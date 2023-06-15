@@ -62,7 +62,7 @@ class BlackjackGame(ctk.CTk):
         # widgets
         self.attributes("-fullscreen", True)
         self.bg = ImageTk.PhotoImage(
-            Image.open("design\\design1.png").resize(
+            Image.open("./design/design1.png").resize(
                 size=(self.width, self.height)
             )
         )

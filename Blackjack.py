@@ -271,8 +271,8 @@ class BlackjackGame(ctk.CTk):
             else:
                 x = 125
 
-        self.hit_btn.configure(command=None)
-        self.stand_btn.configure(command=None)
+        self.hit_btn.configure(state="disabled")
+        self.stand_btn.configure(state="disabled")
         frame_end = ctk.CTkFrame(self, width=500, height=500)
         frame_end.place(x=x, y=300)
         label_end = ctk.CTkLabel(
